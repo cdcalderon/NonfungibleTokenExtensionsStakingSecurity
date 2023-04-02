@@ -1,8 +1,14 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.9;
 
+import "@openzeppelin/contracts/utils/Strings.sol";
+
 contract SimpleNFT {
+    /* Type declarations */
+    using Strings for uint256;
+
     mapping(uint256 => address) private _owners;
+    string baseURL = "https://example.com/images/";
 
     function mint(uint256 _tokenId) external {
         require(_owners[_tokenId] == address(0), "already minted");
@@ -25,5 +31,10 @@ contract SimpleNFT {
         require(msg.sender == _from, "require to be the owner");
 
         _owners[_tokenId] = _to;
+    }
+
+    function tokenURI(uint256 _tokenId) external view returns (string memory) {
+        require(_owners[_tokenId] != address(0), "does not exist");
+        return string(abi.encodePacked(baseURL, _tokenId.toString(), ".jpeg"));
     }
 }
