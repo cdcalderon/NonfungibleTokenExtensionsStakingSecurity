@@ -3,10 +3,11 @@ const { expect } = require("chai");
 const { ethers } = require("hardhat");
 
 describe("SimpleNFT", function () {
-  let nft;
+  let nft, owner, addr1;
 
   beforeEach(async function () {
     const NFT = await ethers.getContractFactory("SimpleNFT");
+    [owner, addr1] = await ethers.getSigners();
     nft = await NFT.deploy();
     await nft.deployed();
   });
@@ -44,6 +45,38 @@ describe("SimpleNFT", function () {
     it("should revert if NFT does not exist", async function () {
       const tokenId = 99;
       await expect(nft.ownerOf(tokenId)).to.be.revertedWith("no such token");
+    });
+  });
+
+  describe("transferFrom", function () {
+    it("should transfer ownership of a valid NFT", async function () {
+      const tokenId = 1;
+      await nft.mint(tokenId);
+      await nft.transferFrom(owner.address, addr1.address, tokenId);
+      expect(await nft.ownerOf(tokenId)).to.equal(addr1.address);
+    });
+
+    it("should revert if the token does not exist", async function () {
+      const tokenId = 99;
+      await expect(
+        nft.transferFrom(owner.address, addr1.address, tokenId)
+      ).to.be.revertedWith("token does not exist");
+    });
+
+    it("should revert if the sender is not the owner of the token", async function () {
+      const tokenId = 1;
+      await nft.mint(tokenId);
+      await expect(
+        nft.connect(addr1).transferFrom(owner.address, addr1.address, tokenId)
+      ).to.be.revertedWith("require to be the owner");
+    });
+
+    it("should revert if _from is not the owner of the token", async function () {
+      const tokenId = 1;
+      await nft.mint(tokenId);
+      await expect(
+        nft.transferFrom(addr1.address, owner.address, tokenId)
+      ).to.be.revertedWith("cannot transfer from");
     });
   });
 });
