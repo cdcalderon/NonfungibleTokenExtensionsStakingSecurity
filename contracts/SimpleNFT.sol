@@ -14,4 +14,16 @@ contract SimpleNFT {
         require(_owners[_tokenId] != address(0), "no such token");
         return _owners[_tokenId];
     }
+
+    function transferFrom(
+        address _from,
+        address _to,
+        uint256 _tokenId
+    ) external payable {
+        require(_owners[_tokenId] != address(0), "token does not exist");
+        require(_owners[_tokenId] == _from, "cannot transfer from"); // check that _from is the owner of token
+        require(msg.sender == _from, "require to be the owner");
+
+        _owners[_tokenId] = _to;
+    }
 }
