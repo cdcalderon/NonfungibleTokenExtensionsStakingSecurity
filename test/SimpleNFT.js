@@ -79,4 +79,18 @@ describe("SimpleNFT", function () {
       ).to.be.revertedWith("cannot transfer from");
     });
   });
+
+  describe("tokenURI", function () {
+    it("should return the correct token URI for a valid token ID", async function () {
+      const tokenId = 1;
+      await nft.mint(tokenId);
+      const expectedTokenURI = "https://example.com/images/1.jpeg";
+      expect(await nft.tokenURI(tokenId)).to.equal(expectedTokenURI);
+    });
+
+    it("should revert if the token ID does not exist", async function () {
+      const tokenId = 99;
+      await expect(nft.tokenURI(tokenId)).to.be.revertedWith("does not exist");
+    });
+  });
 });
