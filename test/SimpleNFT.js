@@ -93,4 +93,37 @@ describe("SimpleNFT", function () {
       await expect(nft.tokenURI(tokenId)).to.be.revertedWith("does not exist");
     });
   });
+
+  describe("setApprovalForAll", function () {
+    it("should set approval correctly", async function () {
+      await nft.setApprovalForAll(addr1.address, true);
+      const isApproved = await nft.isApprovedForAll(
+        owner.address,
+        addr1.address
+      );
+      expect(isApproved).to.equal(true);
+    });
+  });
+
+  describe("transferFrom with approval", function () {
+    it("should allow approved operator to transfer NFT", async function () {
+      const tokenId = 1;
+      await nft.mint(tokenId);
+      await nft.setApprovalForAll(addr1.address, true);
+
+      await nft
+        .connect(addr1)
+        .transferFrom(owner.address, addr1.address, tokenId);
+      expect(await nft.ownerOf(tokenId)).to.equal(addr1.address);
+    });
+
+    it("should revert if operator is not approved for transfer", async function () {
+      const tokenId = 1;
+      await nft.mint(tokenId);
+
+      await expect(
+        nft.connect(addr1).transferFrom(owner.address, addr1.address, tokenId)
+      ).to.be.revertedWith("require to be the owner");
+    });
+  });
 });
