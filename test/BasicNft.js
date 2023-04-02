@@ -56,4 +56,11 @@ describe("BasicNft", function () {
       expect(tokenOwner).to.equal(owner.address);
     });
   });
+
+  describe("Token URI", function () {
+    it("Should return the correct token URI", async function () {
+      const tokenURI = await basicNft.tokenURI(0);
+      expect(tokenURI).to.equal(await basicNft.TOKEN_URI());
+    });
+  });
 });
