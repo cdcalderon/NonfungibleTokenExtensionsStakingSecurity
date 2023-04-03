@@ -8,8 +8,11 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 contract OpenZeppelinNFT is ERC721, Ownable {
     uint256 public tokenSupply = 0;
     uint256 public constant MAX_SUPPLY = 5;
+    address immutable deployer;
 
-    constructor() ERC721("OpenZeppelinNFT", "OPZ") {}
+    constructor() ERC721("OpenZeppelinNFT", "OPZ") {
+        deployer = msg.sender;
+    }
 
     function mint() external {
         require(tokenSupply < MAX_SUPPLY, "supply used up");
@@ -17,7 +20,17 @@ contract OpenZeppelinNFT is ERC721, Ownable {
         tokenSupply++;
     }
 
-    function withdraw() external onlyOwner {
-        payable(msg.sender).transfer(address(this).balance);
+    function withdraw() external {
+        payable(deployer).transfer(address(this).balance);
+    }
+
+    // this can be removed if Ownable is removed and relay on deployer property
+    function renounceOwnership() public pure override {
+        require(false, "cannot renounce");
+    }
+
+    // this can be removed if Ownable is removed and relay on deployer property
+    function transferOwnership(address /* newOwner */) public pure override {
+        require(false, "cannot renounce");
     }
 }
