@@ -33,4 +33,8 @@ contract OpenZeppelinNFT is ERC721, Ownable {
     function transferOwnership(address /* newOwner */) public pure override {
         require(false, "cannot renounce");
     }
+
+    function _baseURI() internal pure override returns (string memory) {
+        return "ipfs://Qmjfdkfhkfuhkfsdbfjhvfjhdfvhvfvfjvjhdvfhjdv/";
+    }
 }
