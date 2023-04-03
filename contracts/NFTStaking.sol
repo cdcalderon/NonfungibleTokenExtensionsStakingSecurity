@@ -37,4 +37,29 @@ contract NFTStaking is IERC721Receiver, ReentrancyGuard {
 
         return this.onERC721Received.selector;
     }
+
+    function claimRewards() external nonReentrant {
+        StakeInfo storage stake = stakers[msg.sender];
+        require(
+            stake.lastClaimed + REWARD_INTERVAL <= block.timestamp,
+            "Claim interval not met"
+        );
+
+        stake.lastClaimed = block.timestamp;
+        erc20Token.transfer(msg.sender, REWARD_AMOUNT);
+    }
+
+    function unstake() external nonReentrant {
+        StakeInfo storage stake = stakers[msg.sender];
+        require(stake.tokenId != 0, "Not staked");
+
+        uint256 tokenId = stake.tokenId;
+        delete stakers[msg.sender];
+
+        erc721Token.safeTransferFrom(address(this), msg.sender, tokenId);
+    }
+
+    function mintERC20(uint256 amount) external {
+        erc20Token.mint(msg.sender, amount);
+    }
 }
