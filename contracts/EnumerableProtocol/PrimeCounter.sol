@@ -14,8 +14,25 @@ contract PrimeCounter {
 
         for (uint256 i = 0; i < numTokens; i++) {
             uint256 tokenId = nftContract.tokenOfOwnerByIndex(userAddress, i);
+            if (isPrime(tokenId)) {
+                primeCount++;
+            }
         }
 
         return primeCount;
+    }
+
+    function isPrime(uint256 num) private pure returns (bool) {
+        if (num < 2) {
+            return false;
+        }
+
+        for (uint256 i = 2; i * i <= num; i++) {
+            if (num % i == 0) {
+                return false;
+            }
+        }
+
+        return true;
     }
 }
