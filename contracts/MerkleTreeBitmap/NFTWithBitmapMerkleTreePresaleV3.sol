@@ -13,7 +13,8 @@ import "@openzeppelin/contracts/interfaces/IERC2981.sol";
 contract NFTWithBitmapMerkleTreePresaleV3 is
     ERC721Enumerable,
     Ownable,
-    ReentrancyGuard
+    ReentrancyGuard,
+    IERC2981
 {
     using BitMaps for BitMaps.BitMap;
 
@@ -21,11 +22,15 @@ contract NFTWithBitmapMerkleTreePresaleV3 is
     BitMaps.BitMap private _claimedBitMap;
     uint256 public constant MAX_SUPPLY = 10;
     uint256 public constant PRESALE_DISCOUNT = 500; // Discount in percentage (1000 = 100%)
+    address public royaltyRecipient;
+    uint256 public constant ROYALTY_RATE = 25; // 2.5% royalty rate (1000 = 100%)
 
     constructor(
-        bytes32 merkleRoot_
+        bytes32 merkleRoot_,
+        address royaltyRecipient_
     ) ERC721("NFTWithBitmapMerkleTreePresale", "NFTBM") {
         merkleRoot = merkleRoot_;
+        royaltyRecipient = royaltyRecipient_;
     }
 
     function mint(uint256 tokenId) external onlyOwner {
@@ -58,5 +63,13 @@ contract NFTWithBitmapMerkleTreePresaleV3 is
 
         // Mint NFT
         _safeMint(_msgSender(), tokenId);
+    }
+
+    function royaltyInfo(
+        uint256,
+        uint256 salePrice
+    ) external view override returns (address, uint256) {
+        uint256 royaltyAmount = (salePrice * ROYALTY_RATE) / 1000;
+        return (royaltyRecipient, royaltyAmount);
     }
 }
