@@ -8,14 +8,16 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 contract OpenZeppelinNFT is ERC721, Ownable {
     uint256 public tokenSupply = 0;
     uint256 public constant MAX_SUPPLY = 5;
+    uint256 public constant PRICE = 0.001 ether;
     address immutable deployer;
 
     constructor() ERC721("OpenZeppelinNFT", "OPZ") {
         deployer = msg.sender;
     }
 
-    function mint() external {
+    function mint() external payable {
         require(tokenSupply < MAX_SUPPLY, "supply used up");
+        require(msg.value == PRICE, "wrong price");
         _mint(msg.sender, tokenSupply);
         tokenSupply++;
     }
