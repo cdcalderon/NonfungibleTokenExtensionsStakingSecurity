@@ -39,16 +39,14 @@ contract NFTWithBitmapMerkleTreePresaleV3 is
     }
 
     function presale(
+        uint256 claimId,
         bytes32[] calldata merkleProof
     ) external payable nonReentrant {
         uint256 tokenId = totalSupply();
         require(tokenId < MAX_SUPPLY, "Presale has ended");
-        require(
-            !_claimedBitMap.get(uint256(uint160(address(_msgSender())))),
-            "Presale already claimed"
-        );
+        require(!_claimedBitMap.get(claimId), "Presale already claimed");
         // Verify the Merkle proof
-        bytes32 leaf = keccak256(abi.encodePacked(_msgSender()));
+        bytes32 leaf = keccak256(abi.encodePacked(_msgSender(), claimId));
         require(
             MerkleProof.verify(merkleProof, merkleRoot, leaf),
             "Invalid Merkle proof"
@@ -59,9 +57,8 @@ contract NFTWithBitmapMerkleTreePresaleV3 is
         require(price >= tokenId, "Invalid payment amount");
 
         // Mark the presale as claimed
-        _claimedBitMap.set(uint256(uint160(address(_msgSender()))));
+        _claimedBitMap.set(claimId);
 
-        // Mint NFT
         _safeMint(_msgSender(), tokenId);
     }
 
