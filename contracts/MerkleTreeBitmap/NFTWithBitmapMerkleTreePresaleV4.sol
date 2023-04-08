@@ -24,6 +24,7 @@ contract NFTWithBitmapMerkleTreePresaleV3 is
     uint256 public constant PRESALE_DISCOUNT = 500; // Discount in percentage (1000 = 100%)
     address public royaltyRecipient;
     uint256 public constant ROYALTY_RATE = 25; // 2.5% royalty rate (1000 = 100%)
+    uint256 public constant ORIGINAL_PRICE = 1 ether;
 
     constructor(
         bytes32 merkleRoot_,
@@ -45,6 +46,7 @@ contract NFTWithBitmapMerkleTreePresaleV3 is
         uint256 tokenId = totalSupply();
         require(tokenId < MAX_SUPPLY, "Presale has ended");
         require(!_claimedBitMap.get(claimId), "Presale already claimed");
+
         // Verify the Merkle proof
         bytes32 leaf = keccak256(abi.encodePacked(_msgSender(), claimId));
         require(
@@ -53,8 +55,8 @@ contract NFTWithBitmapMerkleTreePresaleV3 is
         );
 
         // Calculate discounted price and check payment
-        uint256 price = PRESALE_DISCOUNT * msg.value;
-        require(price >= tokenId, "Invalid payment amount");
+        uint256 price = (ORIGINAL_PRICE * (1000 - PRESALE_DISCOUNT)) / 1000;
+        require(msg.value >= price, "Invalid payment amount");
 
         // Mark the presale as claimed
         _claimedBitMap.set(claimId);
