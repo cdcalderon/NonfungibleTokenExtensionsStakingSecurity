@@ -7,6 +7,10 @@ import "@openzeppelin/contracts/token/ERC721/IERC721Receiver.sol";
 import "@openzeppelin/contracts/token/ERC721/IERC721.sol";
 import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 
+/**
+ * @title NFTStaking
+ * @dev This contract allows staking an NFT and earning rewards in ERC20 tokens.
+ */
 contract NFTStaking is IERC721Receiver, ReentrancyGuard {
     MyERC20Token public erc20Token;
     IERC721 public erc721Token;
@@ -25,6 +29,9 @@ contract NFTStaking is IERC721Receiver, ReentrancyGuard {
         erc721Token = IERC721(_erc721Token);
     }
 
+    /**
+     * @dev Receives an ERC721 token, adds the staker to the mapping and marks the current time as the last claimed time.
+     */
     function onERC721Received(
         address /* operator */,
         address from,
@@ -38,6 +45,10 @@ contract NFTStaking is IERC721Receiver, ReentrancyGuard {
         return this.onERC721Received.selector;
     }
 
+    /**
+     * @dev Claims the reward for staking an NFT.
+     *      The reward can only be claimed if the caller is the owner of the staked NFT and if the claim interval has passed.
+     */
     function claimRewards(uint256 tokenId) external nonReentrant {
         StakeInfo storage stake = stakers[tokenId];
         require(stake.owner == msg.sender, "Not owner of the staked NFT");
@@ -50,6 +61,10 @@ contract NFTStaking is IERC721Receiver, ReentrancyGuard {
         erc20Token.transfer(msg.sender, REWARD_AMOUNT);
     }
 
+    /**
+     * @dev Unstakes an NFT and transfers it back to the owner.
+     *      The staker will lose any accrued rewards if they unstake early.
+     */
     function unstake(uint256 tokenId) external nonReentrant {
         StakeInfo storage stake = stakers[tokenId];
         require(stake.owner == msg.sender, "Not owner of the staked NFT");
@@ -59,6 +74,9 @@ contract NFTStaking is IERC721Receiver, ReentrancyGuard {
         erc721Token.safeTransferFrom(address(this), msg.sender, tokenId);
     }
 
+    /**
+     * @dev Mints ERC20 tokens to the caller.
+     */
     function mintERC20(uint256 amount) external {
         erc20Token.mint(msg.sender, amount);
     }
