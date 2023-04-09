@@ -10,7 +10,13 @@ import "@openzeppelin/contracts/utils/structs/BitMaps.sol";
 import "@openzeppelin/contracts/utils/cryptography/MerkleProof.sol";
 import "@openzeppelin/contracts/interfaces/IERC2981.sol";
 
-contract NFTWithBitmapMerkleTreePresaleV3 is
+/**
+ * @title NFTWithBitmapMerkleTreePresaleV4
+ * @dev A contract that allows a user to participate in a presale by proving their eligibility with a Merkle proof and paying a discounted price for an NFT.
+ * The contract uses a BitMap to keep track of the claims, and uses OpenZeppelin's implementation of Merkle proof verification.
+ * The contract also implements the ERC2981 interface for royalty calculation and payment.
+ */
+contract NFTWithBitmapMerkleTreePresaleV4 is
     ERC721Enumerable,
     Ownable2Step,
     ReentrancyGuard,
@@ -34,11 +40,20 @@ contract NFTWithBitmapMerkleTreePresaleV3 is
         royaltyRecipient = royaltyRecipient_;
     }
 
+    /**
+     * @dev Mints an NFT with a specified token ID.
+     * @param tokenId The ID of the NFT to mint.
+     */
     function mint(uint256 tokenId) external onlyOwner {
         require(tokenId < MAX_SUPPLY, "Invalid tokenId");
         _safeMint(_msgSender(), tokenId);
     }
 
+    /**
+     * @dev Allows a user to participate in the presale by proving their eligibility with a Merkle proof and paying a discounted price for an NFT.
+     * @param claimId The ID of the claim.
+     * @param merkleProof The Merkle proof of the user's eligibility.
+     */
     function presale(
         uint256 claimId,
         bytes32[] calldata merkleProof
@@ -64,11 +79,23 @@ contract NFTWithBitmapMerkleTreePresaleV3 is
         _safeMint(_msgSender(), tokenId);
     }
 
+    /**
+     * @dev Returns the royalty fee recipient and the royalty fee percentage for this contract.
+     * @param tokenId ID of the token being sold
+     * @param salePrice Sale price of the token being sold
+     * @return recipient Address of the royalty recipient
+     * @return royaltyAmount Amount of the royalty fee
+     */
     function royaltyInfo(
-        uint256,
+        uint256 tokenId,
         uint256 salePrice
-    ) external view override returns (address, uint256) {
-        uint256 royaltyAmount = (salePrice * ROYALTY_RATE) / 1000;
-        return (royaltyRecipient, royaltyAmount);
+    )
+        external
+        view
+        override
+        returns (address recipient, uint256 royaltyAmount)
+    {
+        royaltyAmount = (salePrice * ROYALTY_RATE) / 1000;
+        recipient = royaltyRecipient;
     }
 }
